@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>堆 · 全景梳理</title>
+<style>
+:root{--bg:#fff;--bg2:#f5f5f4;--tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#9a9a9a;--bd:rgba(0,0,0,.12);--bd2:rgba(0,0,0,.25);--bl:#378ADD;--blb:#E6F1FB;--blt:#0C447C;--gn:#1D9E75;--gnb:#E1F5EE;--gnt:#085041;--rd:#E24B4A;--rdb:#FCEBEB;--or:#D08B1A;--orb:#FDF3E0;--gy:#B4B2A9;--gyb:#F1EFE8;--tl:#0F6E56;--tlb:#E1F5EE;--pp:#534AB7;--ppb:#EEEDFE;--mono:'SF Mono','Cascadia Code','Consolas',monospace;--sans:system-ui,-apple-system,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#2c2c2a;--tx:#e8e8e8;--tx2:#9a9a9a;--tx3:#6b6b6b;--bd:rgba(255,255,255,.12);--bd2:rgba(255,255,255,.25);--bl:#85B7EB;--blb:#0C447C;--blt:#B5D4F4;--gn:#5DCAA5;--gnb:#085041;--gnt:#9FE1CB;--rd:#F09595;--rdb:#501313;--or:#E8B84D;--orb:#5C3D00;--gy:#888780;--gyb:#444441;--tl:#5DCAA5;--tlb:#085041;--pp:#AFA9EC;--ppb:#26215C}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);display:flex;justify-content:center;padding:32px 16px;line-height:1.7}
+.c{max-width:740px;width:100%}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+h2{font-size:17px;font-weight:500;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+h3{font-size:15px;font-weight:500;margin:20px 0 8px}
+.sub{font-size:13px;color:var(--tx2);margin-bottom:28px}
+p{font-size:14px;color:var(--tx2);margin-bottom:10px}
+p b{font-weight:500;color:var(--tx)}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px}
+pre{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 16px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--tx)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{text-align:left;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);font-weight:500}
+td{padding:8px 10px;border:1px solid var(--bd);color:var(--tx2)}
+.info{border-left:3px solid var(--bl);padding:10px 14px;background:var(--blb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
+.ok{border-left:3px solid var(--gn);padding:10px 14px;background:var(--gnb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
+.warn{border-left:3px solid var(--or);padding:10px 14px;background:var(--orb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
+.toc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px 20px;margin:16px 0 28px}
+.toc-t{font-size:14px;font-weight:500;margin-bottom:8px}
+.toc a{display:block;font-size:13px;color:var(--bl);text-decoration:none;padding:3px 0}
+.toc a:hover{text-decoration:underline}
+.w{border:1px solid var(--bd);border-radius:12px;padding:20px;margin:20px 0;background:var(--bg)}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--bd);background:var(--bg2);color:var(--tx2);cursor:pointer;font-family:var(--sans)}
+.tab:hover{opacity:.8}
+.tab.on{background:var(--blb);color:var(--bl);border-color:var(--bl)}
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0}
+.btn{padding:6px 16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);cursor:pointer;font-size:13px;font-family:var(--sans)}
+.btn:hover{opacity:.8}
+.btn:disabled{opacity:.3;cursor:default}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bd2);transition:background .2s}
+.dot.on{background:var(--bl)}
+.cap{font-size:13px;color:var(--tx2);line-height:1.7;min-height:50px;margin-top:8px}
+.cap b{font-weight:500;color:var(--tx)}
+.cap code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px}
+.albl{font-size:11px;color:var(--tx3);margin-bottom:18px}
+.aw{margin:8px 0 4px;overflow-x:auto;overflow-y:visible;padding-bottom:20px}
+.ar{display:flex;gap:0}
+.ac{width:44px;height:36px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;font-family:var(--mono);background:var(--bg2);color:var(--tx);flex-shrink:0;position:relative}
+.ac .ci{position:absolute;bottom:-14px;font-size:10px;color:var(--tx3);font-weight:400}
+.ac.hl{background:var(--blb);color:var(--bl);border-color:var(--bl)}
+.ac.nw{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
+.ac.sw{background:var(--orb);color:var(--or);border-color:var(--or)}
+.ac.pp{background:var(--rdb);color:var(--rd);border-color:var(--rd)}
+.ac.ok{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
+.ac.lk{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
+.ac.dim{opacity:.25}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>堆 · 全景梳理</h1>
+<p class="sub">从定义到堆排序，一次串起来</p>
+
+<div class="toc">
+<div class="toc-t">目录</div>
+<a href="#s1">1. 堆的定义</a>
+<a href="#s2">2. 数组存储方式</a>
+<a href="#s3">3. 上浮与下沉</a>
+<a href="#s4">4. Push 与 Pop</a>
+<a href="#s4b">4.5 删除任意元素</a>
+<a href="#s5">5. 建堆（heapify）</a>
+<a href="#s6">6. 堆排序</a>
+<a href="#s7">7. 总结：全景图</a>
+</div>
+
+<!-- ===== 1 ===== -->
+<h2 id="s1">1. 堆的定义</h2>
+<p>堆要同时满足两个条件：</p>
+<p><b>形状条件</b>：必须是<b>完全二叉树</b>——除了最后一层，每层都填满；最后一层从左到右连续填，不能有空洞。</p>
+<p><b>值条件</b>（二选一）：大根堆（父 ≥ 子）或小根堆（父 ≤ 子）。</p>
+
+<h3>形式化定义（PDF / 王道）</h3>
+<p>若 n 个关键字序列 L[1…n]（下标从 1 起）满足以下某一条，则称为堆：</p>
+<p>· <b>大根堆</b>：L(i) ≥ L(2i) 且 L(i) ≥ L(2i+1)，其中 1 ≤ i ≤ ⌊n/2⌋<br>· <b>小根堆</b>：L(i) ≤ L(2i) 且 L(i) ≤ L(2i+1)，其中 1 ≤ i ≤ ⌊n/2⌋</p>
+<p>只约束到 ⌊n/2⌋，因为这正是最后一个非叶子节点——之后的都是叶子，没有子节点可比。</p>
+<div class="info">堆<b>不关心</b>左右孩子之间谁大谁小，只管父子关系。这和二叉搜索树（左 &lt; 根 &lt; 右）完全不同。</div>
+
+<svg width="100%" viewBox="0 0 700 200">
+<text x="175" y="20" text-anchor="middle" font-size="13" font-weight="500" fill="var(--gn)" font-family="var(--sans)">小顶堆（父 ≤ 子）</text>
+<circle cx="175" cy="58" r="22" fill="var(--gnb)" stroke="var(--gn)" stroke-width="1"/>
+<text x="175" y="58" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--gn)" font-family="var(--sans)">1</text>
+<line x1="158" y1="76" x2="108" y2="106" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="192" y1="76" x2="242" y2="106" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="98" cy="124" r="22" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="98" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">3</text>
+<circle cx="252" cy="124" r="22" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="252" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">2</text>
+<line x1="82" y1="142" x2="54" y2="162" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="114" y1="142" x2="142" y2="162" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="46" cy="178" r="18" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="46" y="178" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--tx)" font-family="var(--sans)">7</text>
+<circle cx="150" cy="178" r="18" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="150" y="178" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--tx)" font-family="var(--sans)">4</text>
+<text x="525" y="20" text-anchor="middle" font-size="13" font-weight="500" fill="var(--rd)" font-family="var(--sans)">大根堆（父 ≥ 子）</text>
+<circle cx="525" cy="58" r="22" fill="var(--rdb)" stroke="var(--rd)" stroke-width="1"/>
+<text x="525" y="58" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--rd)" font-family="var(--sans)">7</text>
+<line x1="508" y1="76" x2="458" y2="106" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="542" y1="76" x2="592" y2="106" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="448" cy="124" r="22" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="448" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">5</text>
+<circle cx="602" cy="124" r="22" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="602" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">3</text>
+<line x1="432" y1="142" x2="404" y2="162" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="464" y1="142" x2="492" y2="162" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="396" cy="178" r="18" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="396" y="178" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--tx)" font-family="var(--sans)">1</text>
+<circle cx="500" cy="178" r="18" fill="var(--bg2)" stroke="var(--bd2)" stroke-width=".5"/>
+<text x="500" y="178" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--tx)" font-family="var(--sans)">4</text>
+</svg>
+<p>注意看：小顶堆里 3 在 2 的左边（3 &gt; 2），堆<b>不管</b>兄弟大小关系。</p>
+
+<!-- ===== 2 ===== -->
+<h2 id="s2">2. 数组存储方式</h2>
+<p>堆不用链式结构，直接用<b>数组</b>按层序存储。父子关系靠下标算：</p>
+<svg width="100%" viewBox="0 0 700 350">
+<circle cx="350" cy="50" r="24" fill="var(--tlb)" stroke="var(--tl)" stroke-width="1"/>
+<text x="350" y="50" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tl)" font-family="var(--sans)">1</text>
+<text x="350" y="84" text-anchor="middle" font-size="11" fill="var(--tx3)" font-family="var(--mono)">[1]</text>
+<line x1="330" y1="68" x2="225" y2="110" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="370" y1="68" x2="475" y2="110" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="215" cy="130" r="24" fill="var(--ppb)" stroke="var(--pp)" stroke-width="1"/>
+<text x="215" y="130" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--pp)" font-family="var(--sans)">3</text>
+<text x="215" y="164" text-anchor="middle" font-size="11" fill="var(--tx3)" font-family="var(--mono)">[2]</text>
+<circle cx="485" cy="130" r="24" fill="var(--ppb)" stroke="var(--pp)" stroke-width="1"/>
+<text x="485" y="130" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--pp)" font-family="var(--sans)">2</text>
+<text x="485" y="164" text-anchor="middle" font-size="11" fill="var(--tx3)" font-family="var(--mono)">[3]</text>
+<line x1="197" y1="150" x2="135" y2="190" stroke="var(--bd2)" stroke-width=".5"/>
+<line x1="233" y1="150" x2="295" y2="190" stroke="var(--bd2)" stroke-width=".5"/>
+<circle cx="125" cy="210" r="24" fill="var(--gyb)" stroke="var(--gy)" stroke-width=".5"/>
+<text x="125" y="210" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">7</text>
+<text x="125" y="244" text-anchor="middle" font-size="11" fill="var(--tx3)" font-family="var(--mono)">[4]</text>
+<circle cx="305" cy="210" r="24" fill="var(--gyb)" stroke="var(--gy)" stroke-width=".5"/>
+<text x="305" y="210" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">4</text>
+<text x="305" y="244" text-anchor="middle" font-size="11" fill="var(--tx3)" font-family="var(--mono)">[5]</text>
+<text x="44" y="294" font-size="12" fill="var(--tx2)" font-family="var(--sans)">数组：</text>
+<rect x="110" y="278" width="56" height="40" rx="4" fill="var(--tlb)" stroke="var(--tl)" stroke-width=".5"/>
+<text x="138" y="298" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tl)" font-family="var(--sans)">1</text><text x="138" y="330" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">1</text>
+<rect x="176" y="278" width="56" height="40" rx="4" fill="var(--ppb)" stroke="var(--pp)" stroke-width=".5"/>
+<text x="204" y="298" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--pp)" font-family="var(--sans)">3</text><text x="204" y="330" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">2</text>
+<rect x="242" y="278" width="56" height="40" rx="4" fill="var(--ppb)" stroke="var(--pp)" stroke-width=".5"/>
+<text x="270" y="298" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--pp)" font-family="var(--sans)">2</text><text x="270" y="330" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">3</text>
+<rect x="308" y="278" width="56" height="40" rx="4" fill="var(--gyb)" stroke="var(--gy)" stroke-width=".5"/>
+<text x="336" y="298" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">7</text><text x="336" y="330" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">4</text>
+<rect x="374" y="278" width="56" height="40" rx="4" fill="var(--gyb)" stroke="var(--gy)" stroke-width=".5"/>
+<text x="402" y="298" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="var(--tx)" font-family="var(--sans)">4</text><text x="402" y="330" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">5</text>
+<text x="490" y="290" font-size="12" fill="var(--tx2)" font-family="var(--mono)">左孩子 = 2i</text>
+<text x="490" y="308" font-size="12" fill="var(--tx2)" font-family="var(--mono)">右孩子 = 2i + 1</text>
+<text x="490" y="326" font-size="12" fill="var(--tx2)" font-family="var(--mono)">父节点 = ⌊i/2⌋</text>
+</svg>
+<div class="info">堆必须是<b>完全二叉树</b>——中间有空洞的话，数组里就得留空位，下标公式对不上。</div>
+<div class="warn"><b>注意下标起点</b>：王道/课本从 <b>1</b> 开始（左孩子 = 2i，父 = i/2）；LeetCode 从 <b>0</b> 开始（左孩子 = 2i+1，父 = (i−1)/2）。本质一样，只差偏移。</div>
+
+<!-- ===== 3 ===== -->
+<h2 id="s3">3. 上浮与下沉</h2>
+<p>堆的所有操作都建立在这两个"原子动作"上（以小顶堆为例）：</p>
+<h3>上浮（sift up）</h3>
+<p>某节点比父节点<b>小</b>，不断和父交换往上走，直到父更小或到达根。</p>
+<h3>下沉（sift down）</h3>
+<p>某节点比子节点<b>大</b>，不断和<b>较小的子</b>交换往下走，直到比两个子都小或到达叶子。</p>
+<div class="info"><b>为什么和"较小的子"交换？</b>如果和较大的子交换，那个子到了父的位置后，可能比另一个子还大，堆性质还是不满足。</div>
+<p>两个操作都沿树的高度走，复杂度 <b>O(log n)</b>。</p>
+
+<!-- ===== 4 ===== -->
+<h2 id="s4">4. Push 与 Pop</h2>
+<table>
+<tr><th>操作</th><th>步骤</th><th>原子操作</th><th>复杂度</th></tr>
+<tr><td><b>Push</b></td><td>新元素放到数组末尾，然后上浮</td><td>上浮</td><td>O(log n)</td></tr>
+<tr><td><b>Pop</b></td><td>取走根，末尾搬到根，数组缩短 1，然后下沉</td><td>下沉</td><td>O(log n)</td></tr>
+</table>
+<div class="w">
+<div class="tabs" id="pp-tabs"></div>
+<svg id="pp-svg" width="100%" viewBox="0 0 700 280"></svg>
+<div class="albl">数组视角：</div>
+<div class="aw"><div class="ar" id="pp-arr"></div></div>
+<div class="ctrl"><button class="btn" id="pp-pb" onclick="ppGo(-1)">上一步</button><div class="dots" id="pp-dots"></div><button class="btn" id="pp-nb" onclick="ppGo(1)">下一步</button></div>
+<div class="cap" id="pp-cap"></div>
+</div>
+
+<!-- ===== 4.5 ===== -->
+<h2 id="s4b">4.5 删除任意元素</h2>
+<p>Pop 只删根节点。但堆也支持<b>删除任意位置</b>的元素（PDF 例题）：</p>
+<p><b>步骤</b>：用<b>堆底元素</b>（数组最后一个）替换被删除的位置，数组缩短 1，然后对该位置做调整——可能需要<b>下沉</b>（替换值比子大），也可能需要<b>上浮</b>（替换值比父小）。</p>
+
+<h3>PDF 例题：删除元素 13</h3>
+<p>小顶堆 <code>[09, 13, 65, 17, 45, 78, 87, 53, 32, 46]</code>，删除下标 1 处的 <b>13</b>。</p>
+
+<div class="w">
+<svg id="del-svg" width="100%" viewBox="0 0 700 280"></svg>
+<div class="albl">数组视角：</div>
+<div class="aw"><div class="ar" id="del-arr"></div></div>
+<div class="ctrl"><button class="btn" id="del-pb" onclick="delGo(-1)">上一步</button><div class="dots" id="del-dots"></div><button class="btn" id="del-nb" onclick="delGo(1)">下一步</button></div>
+<div class="cap" id="del-cap"></div>
+</div>
+
+<div class="info"><b>和 Pop 的关系</b>：Pop 其实就是"删除下标 0"的特殊情况。删除任意位置时，替换后的元素可能需要上浮也可能需要下沉，而 Pop 中替换后一定是下沉（因为堆底元素放到根，不可能比根的父节点更小——根没有父节点）。</div>
+
+<!-- ===== 5 ===== -->
+<h2 id="s5">5. 建堆（heapify）</h2>
+<p>给一个<b>无序数组</b>，把它变成合法的堆。</p>
+<p><b>思路</b>：叶子节点没有子节点，"父 ≤ 子"的约束对它根本不存在，天然满足堆性质。所以只需要从<b>最后一个非叶子节点</b>开始，往前逐个做<b>下沉</b>。</p>
+
+<h3>为什么最后一个非叶子节点是 <code>n/2 - 1</code>（下标从 0 起）？</h3>
+<p>最后一个非叶子节点，就是<b>数组最后一个元素的父节点</b>——因为完全二叉树从左到右连续填，最后一个元素是"最靠右下"的节点，它的父节点之后的所有节点都不可能再有孩子。</p>
+<p>数组最后一个元素的下标是 <code>n-1</code>，它的父节点下标是 <code>⌊(n-1-1)/2⌋ = ⌊(n-2)/2⌋</code>。</p>
+<p>这个公式用统一的 <code>⌊(i-1)/2⌋</code> 即可，不需要区分左右孩子。原因：</p>
+<p>· 左孩子 <code>i = 2p+1</code>：<code>⌊(2p+1-1)/2⌋ = p</code><br>· 右孩子 <code>i = 2p+2</code>：<code>⌊(2p+2-1)/2⌋ = ⌊p + 1/2⌋ = p</code>（整数向下取整）</p>
+<p>而 <code>⌊(n-2)/2⌋</code> 在 C 的整数除法下等价于 <code>n/2 - 1</code>（可分 n 为奇偶验证）。</p>
+<div class="info"><b>下标从 1 起的版本更简洁</b>：最后一个元素下标为 n，父节点直接 <code>n/2</code>（整数除法）。这也是很多课本选择从 1 开始的原因——公式更干净。</div>
+
+<div class="ok"><b>时间复杂度 O(n)</b>，不是 O(n log n)。大部分节点在底层，下沉路径短。</div>
+<div class="w">
+<svg id="bh-svg" width="100%" viewBox="0 0 700 260"></svg>
+<div class="albl">数组视角：</div>
+<div class="aw"><div class="ar" id="bh-arr"></div></div>
+<div class="ctrl"><button class="btn" id="bh-pb" onclick="bhGo(-1)">上一步</button><div class="dots" id="bh-dots"></div><button class="btn" id="bh-nb" onclick="bhGo(1)">下一步</button></div>
+<div class="cap" id="bh-cap"></div>
+</div>
+
+<h3>代码（PDF / 王道，下标从 1 开始）</h3>
+<div class="warn"><b>注意</b>：以下代码下标从 <b>1</b> 开始，A[0] 用作临时存储。左孩子 = 2i，右孩子 = 2i+1，父 = i/2。</div>
+<pre>// 将以 k 为根的子树调整为大根堆（下沉操作）
+void HeadAdjust(int A[], int k, int len) {
+    A[0] = A[k];                          // A[0]暂存子树的根结点
+    for (int i = 2*k; i &lt;= len; i *= 2) { // 沿key较大的子结点向下筛选
+        if (i &lt; len &amp;&amp; A[i] &lt; A[i+1])
+            i++;                          // 取key较大的子结点的下标
+        if (A[0] &gt;= A[i])  break;         // 筛选结束
+        else {
+            A[k] = A[i];                  // 将A[i]调整到双亲结点上
+            k = i;                        // 修改k值，以便继续向下筛选
+        }
+    }
+    A[k] = A[0];                          // 被筛选结点的值放入最终位置
+}
+
+// 建立大根堆
+void BuildMaxHeap(int A[], int len) {
+    for (int i = len/2; i &gt; 0; i--)       // 从后往前调整所有非终端结点
+        HeadAdjust(A, i, len);
+}</pre>
+<h2 id="s6">6. 堆排序</h2>
+<p>堆排序 = <b>建堆</b> + <b>反复"类 pop"</b>。和 pop 的唯一区别：取出的元素不是返回给调用者，而是<b>交换到数组末尾锁住</b>。</p>
+<table>
+<tr><th></th><th>Pop</th><th>堆排序每一趟</th></tr>
+<tr><td><b>操作</b></td><td>记录根 → 末尾填根 → 缩短 → 下沉</td><td>根和末尾交换 → 锁定末尾 → 下沉</td></tr>
+<tr><td><b>结果去哪</b></td><td>返回给调用者，离开数组</td><td>留在数组末尾</td></tr>
+</table>
+<div class="warn"><b>升序排列用大根堆</b>：每趟把最大值换到末尾锁住。</div>
+<div class="w">
+<svg id="hs-svg" width="100%" viewBox="0 0 700 260"></svg>
+<div style="font-size:11px;color:var(--tx3);margin-bottom:12px">数组视角（<span style="color:var(--gn)">■</span> 已排好锁定）：</div>
+<div class="aw"><div class="ar" id="hs-arr"></div></div>
+<div class="ctrl"><button class="btn" id="hs-pb" onclick="hsGo(-1)">上一步</button><div class="dots" id="hs-dots"></div><button class="btn" id="hs-nb" onclick="hsGo(1)">下一步</button></div>
+<div class="cap" id="hs-cap"></div>
+</div>
+
+<h3>代码（PDF / 王道，下标从 1 开始）</h3>
+<div class="warn">同样下标从 <b>1</b> 开始，复用上面的 <code>HeadAdjust</code> 和 <code>BuildMaxHeap</code>。</div>
+<pre>// 堆排序的完整逻辑
+void HeapSort(int A[], int len) {
+    BuildMaxHeap(A, len);                 // 初始建堆
+    for (int i = len; i &gt; 1; i--) {       // n-1趟的交换和建堆过程
+        swap(A[i], A[1]);                 // 堆顶元素和堆底元素交换
+        HeadAdjust(A, 1, i-1);            // 把剩余的待排序元素整理成堆
+    }
+}</pre>
+
+<h3>算法效率分析（PDF）</h3>
+<table>
+<tr><th>指标</th><th>值</th><th>说明</th></tr>
+<tr><td><b>建堆</b></td><td>O(n)</td><td>关键字对比次数不超过 4n</td></tr>
+<tr><td><b>排序</b></td><td>O(n log₂n)</td><td>n-1 趟，每趟下沉最多 h-1 层，每下沉一层最多对比 2 次</td></tr>
+<tr><td><b>总时间</b></td><td>O(n log₂n)</td><td>O(n) + O(n log₂n) = O(n log₂n)</td></tr>
+<tr><td><b>空间</b></td><td>O(1)</td><td>原地排序，只需常数个辅助变量</td></tr>
+<tr><td><b>稳定性</b></td><td>不稳定</td><td>见下方反例</td></tr>
+</table>
+
+<h3>为什么不稳定？</h3>
+<p>PDF 反例：初始序列 <code>[1, 2, 2]</code>（两个 2 分别记为 2a 和 2b）。</p>
+<p>建大根堆后变为 <code>[2a, 1, 2b]</code>。第一趟堆排序：堆顶 2a 和末尾 2b 交换 → <code>[2b, 1, 2a]</code>。最终排好后 2b 排在 2a 前面——两个相等元素的<b>相对顺序被打乱</b>了。</p>
+
+<!-- ===== 7 ===== -->
+<h2 id="s7">7. 总结：全景图</h2>
+<p><b>底层工具</b>：上浮、下沉。</p>
+<p><b>基于它们构建的操作</b>：Push = 放末尾 + 上浮；Pop = 取根 + 末尾填根 + 下沉；建堆 = 从最后一个非叶子节点往前逐个下沉。</p>
+<table>
+<tr><th></th><th>优先队列（如 mergeKLists）</th><th>堆排序</th></tr>
+<tr><td><b>堆的角色</b></td><td>当"容器"，反复 push/pop</td><td>原地排序</td></tr>
+<tr><td><b>用到的操作</b></td><td>push（上浮）、pop（下沉）</td><td>建堆（下沉）、反复"交换 + 下沉"</td></tr>
+<tr><td><b>堆类型</b></td><td>按需求选</td><td>升序用大根堆</td></tr>
+<tr><td><b>总复杂度</b></td><td>每次 O(log n)</td><td>O(n log n)</td></tr>
+</table>
+<div class="ok"><b>核心教训</b>：push/pop 和堆排序共享同一套底层机制（上浮/下沉），只是<b>目的不同</b>：一个是进进出出的容器，一个是原地排序的算法。</div>
+
+</div>
+<script>
+function treePos(n){var pos=[];if(!n)return pos;for(var i=0;i<n;i++){var lv=Math.floor(Math.log2(i+1)),idx=i-(Math.pow(2,lv)-1),cnt=Math.pow(2,lv),H=Math.min(60,220/Math.ceil(Math.log2(n+1))),span=600,gap=span/cnt;pos.push({x:50+gap*(idx+.5),y:40+lv*H})}return pos}
+function mkDots(el,t,c){el.innerHTML='';for(var i=0;i<t;i++){var d=document.createElement('div');d.className='dot'+(i===c?' on':'');el.appendChild(d)}}
+function D(i){return i+1}
+
+/* === Push/Pop === */
+var pushS=[
+{vals:[9,17,65,32,45,78,87,53],hl:[],newIdx:-1,swapPair:null,phase:"init",cap:"<b>初始</b>：小顶堆 <code>[09, 17, 65, 32, 45, 78, 87, 53]</code>（PDF 例题）。现在 <b>push(13)</b>。"},
+{vals:[9,17,65,32,45,78,87,53,13],hl:[],newIdx:8,swapPair:null,phase:"insert",cap:"<b>放到末尾</b>。新元素 <b>13</b> 放到下标 9。"},
+{vals:[9,17,65,32,45,78,87,53,13],hl:[],newIdx:8,swapPair:[8,3],phase:"cmp1",cap:"<b>上浮</b>：父 = ⌊9/2⌋ = 下标 4（值 32）。13 &lt; 32，交换。"},
+{vals:[9,17,65,13,45,78,87,53,32],hl:[],newIdx:3,swapPair:null,phase:"swap1",cap:"<b>交换完成</b>。13 上浮到下标 4。继续：父 = ⌊4/2⌋ = 下标 2（值 17）。"},
+{vals:[9,17,65,13,45,78,87,53,32],hl:[],newIdx:3,swapPair:[3,1],phase:"cmp2",cap:"13 &lt; 17，继续交换。"},
+{vals:[9,13,65,17,45,78,87,53,32],hl:[],newIdx:1,swapPair:null,phase:"swap2",cap:"<b>交换完成</b>。13 上浮到下标 2。继续：父 = ⌊2/2⌋ = 下标 1（值 09）。"},
+{vals:[9,13,65,17,45,78,87,53,32],hl:[0,1],newIdx:1,swapPair:null,phase:"done",cap:"13 &gt; 09，父更小，停止。<b>push 完成</b>：<code>[09, 13, 65, 17, 45, 78, 87, 53, 32]</code>。<br>13 从第 4 层上浮到第 2 层，经过 2 次交换。"}
+];
+var popS=[
+{vals:[9,13,65,17,45,78,87,53,32,46],hl:[],popIdx:-1,swapPair:null,lastIdx:-1,phase:"init",cap:"<b>初始</b>：小顶堆 <code>[09, 13, 65, 17, 45, 78, 87, 53, 32, 46]</code>（PDF 例题，10 个元素）。现在 <b>pop()</b>。"},
+{vals:[9,13,65,17,45,78,87,53,32,46],hl:[],popIdx:0,swapPair:null,lastIdx:-1,phase:"take",cap:"<b>记录堆顶</b> A[1] = 09（最小值）。"},
+{vals:[46,13,65,17,45,78,87,53,32,9],hl:[],popIdx:-1,swapPair:null,lastIdx:9,phase:"move",cap:"<b>末尾填根</b>。A[10] = 46 移到 A[1] 的位置。"},
+{vals:[46,13,65,17,45,78,87,53,32],hl:[],popIdx:-1,swapPair:null,lastIdx:-1,phase:"shrink",cap:"数组缩短为 9 个。根 46 比子大，需要<b>下沉</b>。"},
+{vals:[46,13,65,17,45,78,87,53,32],hl:[],popIdx:-1,swapPair:[0,2,1],lastIdx:-1,phase:"cmp1",cap:"<b>下沉</b>：子 13（下标 2）和 65（下标 3）。较小的 <b>13</b>。46 &gt; 13，交换。"},
+{vals:[13,46,65,17,45,78,87,53,32],hl:[],popIdx:-1,swapPair:null,lastIdx:-1,phase:"swap1",cap:"<b>交换完成</b>。46 下沉到下标 2。继续比较子节点。"},
+{vals:[13,46,65,17,45,78,87,53,32],hl:[],popIdx:-1,swapPair:[1,4,3],lastIdx:-1,phase:"cmp2",cap:"子 17（下标 4）和 45（下标 5）。较小的 <b>17</b>。46 &gt; 17，交换。"},
+{vals:[13,17,65,46,45,78,87,53,32],hl:[],popIdx:-1,swapPair:null,lastIdx:-1,phase:"swap2",cap:"<b>交换完成</b>。46 下沉到下标 4。继续比较子节点。"},
+{vals:[13,17,65,46,45,78,87,53,32],hl:[],popIdx:-1,swapPair:[3,7,8],lastIdx:-1,phase:"cmp3",cap:"子 53（下标 8）和 32（下标 9）。较小的 <b>32</b>。46 &gt; 32，交换。"},
+{vals:[13,17,65,32,45,78,87,53,46],hl:[],popIdx:-1,swapPair:null,lastIdx:-1,phase:"swap3",cap:"<b>交换完成</b>。46 下沉到下标 9，已是叶子，停止。"},
+{vals:[13,17,65,32,45,78,87,53,46],hl:[8],popIdx:-1,swapPair:null,lastIdx:-1,phase:"done",cap:"<b>pop 完成！</b>返回 <b>09</b>，剩余堆：<code>[13, 17, 65, 32, 45, 78, 87, 53, 46]</code>。<br>46 从根一路下沉到叶子，经过 3 次交换——O(log n)。"}
+];
+var ppD=[{label:"Push（插入 + 上浮）",steps:pushS},{label:"Pop（取最小 + 下沉）",steps:popS}],ppDi=0,ppSi=0;
+function ppNC(i,s,d){if(d===0){if(s.swapPair&&s.swapPair.includes(i))return{f:'var(--orb)',s:'var(--or)',t:'var(--or)'};if(i===s.newIdx)return{f:'var(--gnb)',s:'var(--gn)',t:'var(--gn)'};if(s.hl&&s.hl.includes(i))return{f:'var(--blb)',s:'var(--bl)',t:'var(--bl)'}}else{if(i===s.popIdx)return{f:'var(--rdb)',s:'var(--rd)',t:'var(--rd)'};if(i===s.lastIdx)return{f:'var(--gyb)',s:'var(--gy)',t:'var(--gy)'};if(s.swapPair&&s.swapPair[0]===i)return{f:'var(--orb)',s:'var(--or)',t:'var(--or)'};if(s.swapPair&&s.swapPair.length===3&&s.swapPair[2]===i)return{f:'var(--gnb)',s:'var(--gn)',t:'var(--gn)'};if(s.swapPair&&s.swapPair.length===3&&s.swapPair[1]===i)return{f:'var(--blb)',s:'var(--bl)',t:'var(--bl)'};if(s.hl&&s.hl.includes(i))return{f:'var(--gnb)',s:'var(--gn)',t:'var(--gn)'}}return{f:'var(--bg2)',s:'var(--bd2)',t:'var(--tx)'}}
+function ppAC(i,s,d){if(d===0){if(s.swapPair&&s.swapPair.includes(i))return' sw';if(i===s.newIdx)return' nw';if(s.hl&&s.hl.includes(i))return' hl'}else{if(i===s.popIdx)return' pp';if(i===s.lastIdx)return' dim';if(s.swapPair&&s.swapPair[0]===i)return' sw';if(s.swapPair&&s.swapPair.length===3&&s.swapPair[2]===i)return' nw';if(s.hl&&s.hl.includes(i))return' hl'}return''}
+function ppR(){var dm=ppD[ppDi],st=dm.steps[ppSi],v=st.vals,n=v.length,pos=treePos(n);
+var te=document.getElementById('pp-tabs');te.innerHTML='';ppD.forEach(function(d,i){var t=document.createElement('div');t.className='tab'+(i===ppDi?' on':'');t.textContent=d.label;t.onclick=function(){ppDi=i;ppSi=0;ppR()};te.appendChild(t)});
+var sg='';for(var i=0;i<n;i++){[2*i+1,2*i+2].forEach(function(ch){if(ch<n)sg+='<line x1="'+pos[i].x+'" y1="'+(pos[i].y+24)+'" x2="'+pos[ch].x+'" y2="'+(pos[ch].y-24)+'" stroke="var(--bd2)" stroke-width="0.5"/>'})}
+if(st.swapPair){var a,b;if(ppDi===0){a=st.swapPair[0];b=st.swapPair[1]}else if(st.swapPair.length===3){a=st.swapPair[0];b=st.swapPair[2]}if(a!=null&&b!=null&&a<n&&b<n){sg+='<text x="'+((pos[a].x+pos[b].x)/2-16)+'" y="'+((pos[a].y+pos[b].y)/2)+'" font-size="16" fill="var(--or)" font-family="var(--sans)">⇅</text>'}}
+for(var i=0;i<n;i++){if(ppDi===1&&i===st.lastIdx)continue;var c=ppNC(i,st,ppDi);sg+='<circle cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="24" fill="'+c.f+'" stroke="'+c.s+'" stroke-width="1.2"/><text x="'+pos[i].x+'" y="'+pos[i].y+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="'+c.t+'" font-family="var(--sans)">'+v[i]+'</text><text x="'+pos[i].x+'" y="'+(pos[i].y+34)+'" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">['+D(i)+']</text>'}
+if(ppDi===1&&st.phase==='done')sg+='<text x="620" y="50" text-anchor="end" font-size="13" fill="var(--gn)" font-family="var(--sans)">返回值: '+dm.steps[0].vals[0]+'</text>';
+if(ppDi===1&&st.phase==='take')sg+='<text x="620" y="50" text-anchor="end" font-size="13" fill="var(--rd)" font-family="var(--sans)">取走 → '+dm.steps[0].vals[0]+'</text>';
+document.getElementById('pp-svg').innerHTML=sg;
+var ae=document.getElementById('pp-arr');ae.innerHTML='';for(var i=0;i<n;i++){var cl=document.createElement('div');cl.className='ac'+ppAC(i,st,ppDi);if(ppDi===1&&i===st.lastIdx)cl.className='ac dim';cl.innerHTML=v[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl)}
+document.getElementById('pp-pb').disabled=ppSi===0;document.getElementById('pp-nb').disabled=ppSi===dm.steps.length-1;
+mkDots(document.getElementById('pp-dots'),dm.steps.length,ppSi);document.getElementById('pp-cap').innerHTML=st.cap}
+function ppGo(d){var n=ppSi+d;if(n>=0&&n<ppD[ppDi].steps.length){ppSi=n;ppR()}}
+ppR();
+
+/* === 建堆 === */
+var bhS=[
+{vals:[4,7,3,1,5,2],focus:-1,swap:null,done:[],cap:"<b>初始</b>：无序 <code>[4, 7, 3, 1, 5, 2]</code>（6 个元素）。最后一个非叶子 = ⌊n/2⌋ = 下标 3（值 3）。从它开始往前。"},
+{vals:[4,7,3,1,5,2],focus:2,swap:null,done:[],cap:"<b>下标 3</b>（值 3）。子：下标 6（值 2）。2 &lt; 3，交换。"},
+{vals:[4,7,2,1,5,3],focus:2,swap:[2,5],done:[],cap:"<b>交换</b>：3 ↔ 2。继续往前处理下标 2。"},
+{vals:[4,7,2,1,5,3],focus:1,swap:null,done:[2],cap:"<b>下标 2</b>（值 7）。子：1（下标 4）和 5（下标 5）。较小的 1。7 &gt; 1，交换。"},
+{vals:[4,1,2,7,5,3],focus:1,swap:[1,3],done:[2],cap:"<b>交换</b>：7 ↔ 1。7 到叶子，停。继续下标 1。"},
+{vals:[4,1,2,7,5,3],focus:0,swap:null,done:[1,2],cap:"<b>下标 1</b>（值 4，根）。子：1（下标 2）和 2（下标 3）。较小的 1。4 &gt; 1，交换。"},
+{vals:[1,4,2,7,5,3],focus:0,swap:[0,1],done:[2],cap:"<b>交换</b>：4 ↔ 1。4 到下标 2，子 7 和 5 都更大，停。"},
+{vals:[1,4,2,7,5,3],focus:-1,swap:null,done:[0,1,2,3,4,5],cap:"<b>建堆完成！</b><code>[1, 4, 2, 7, 5, 3]</code>。O(n)。"}
+],bhC=0;
+function bhR(){var s=bhS[bhC],n=s.vals.length,pos=treePos(n),sg='';
+for(var i=0;i<n;i++){[2*i+1,2*i+2].forEach(function(ch){if(ch<n)sg+='<line x1="'+pos[i].x+'" y1="'+(pos[i].y+24)+'" x2="'+pos[ch].x+'" y2="'+(pos[ch].y-24)+'" stroke="var(--bd2)" stroke-width="0.5"/>'})}
+if(s.swap){var a=s.swap[0],b=s.swap[1];sg+='<text x="'+((pos[a].x+pos[b].x)/2-16)+'" y="'+((pos[a].y+pos[b].y)/2)+'" font-size="16" fill="var(--or)" font-family="var(--sans)">⇅</text>'}
+for(var i=0;i<n;i++){var iF=i===s.focus,iS=s.swap&&(s.swap[0]===i||s.swap[1]===i),iD=s.done.indexOf(i)!==-1&&!iF&&!iS;
+var f,st,tf;if(iS){f='var(--orb)';st='var(--or)';tf='var(--or)'}else if(iF){f='var(--blb)';st='var(--bl)';tf='var(--bl)'}else if(iD||bhC===bhS.length-1){f='var(--gnb)';st='var(--gn)';tf='var(--gn)'}else{f='var(--bg2)';st='var(--bd2)';tf='var(--tx)'}
+sg+='<circle cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="24" fill="'+f+'" stroke="'+st+'" stroke-width="1.2"/><text x="'+pos[i].x+'" y="'+pos[i].y+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="'+tf+'" font-family="var(--sans)">'+s.vals[i]+'</text><text x="'+pos[i].x+'" y="'+(pos[i].y+34)+'" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">['+D(i)+']</text>'}
+document.getElementById('bh-svg').innerHTML=sg;
+var ae=document.getElementById('bh-arr');ae.innerHTML='';for(var i=0;i<n;i++){var cl=document.createElement('div'),cls='ac',iS=s.swap&&(s.swap[0]===i||s.swap[1]===i),iF=i===s.focus,iD=s.done.indexOf(i)!==-1&&!iF&&!iS;if(iS)cls+=' sw';else if(iF)cls+=' hl';else if(iD||bhC===bhS.length-1)cls+=' ok';cl.className=cls;cl.innerHTML=s.vals[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl)}
+document.getElementById('bh-cap').innerHTML=s.cap;document.getElementById('bh-pb').disabled=bhC===0;document.getElementById('bh-nb').disabled=bhC===bhS.length-1;mkDots(document.getElementById('bh-dots'),bhS.length,bhC)}
+function bhGo(d){var n=bhC+d;if(n>=0&&n<bhS.length){bhC=n;bhR()}}
+bhR();
+
+/* === 删除任意元素 === */
+var delS=[
+{vals:[9,13,65,17,45,78,87,53,32,46],focus:1,swap:null,dim:-1,cap:"<b>初始</b>：小顶堆 <code>[09, 13, 65, 17, 45, 78, 87, 53, 32, 46]</code>。<br>要删除下标 2 处的 <b>13</b>。"},
+{vals:[9,46,65,17,45,78,87,53,32,13],focus:1,swap:null,dim:9,cap:"<b>用堆底替换</b>：把最后一个元素 <b>46</b> 放到下标 2 的位置，数组缩短 1。"},
+{vals:[9,46,65,17,45,78,87,53,32],focus:1,swap:null,dim:-1,cap:"<b>调整</b>：46 在下标 2。先检查是否需要上浮：父 = 下标 1（值 9）。46 &gt; 9，不用上浮。<br>再检查下沉：子 17（下标 4）和 45（下标 5）。较小的 <b>17</b>。46 &gt; 17，交换。"},
+{vals:[9,46,65,17,45,78,87,53,32],focus:-1,swap:[1,3],dim:-1,cap:"<b>交换</b>：46 ↔ 17。"},
+{vals:[9,17,65,46,45,78,87,53,32],focus:3,swap:null,dim:-1,cap:"46 下沉到下标 4。继续：子 53（下标 8）和 32（下标 9）。较小的 <b>32</b>。46 &gt; 32，交换。"},
+{vals:[9,17,65,46,45,78,87,53,32],focus:-1,swap:[3,8],dim:-1,cap:"<b>交换</b>：46 ↔ 32。"},
+{vals:[9,17,65,32,45,78,87,53,46],focus:-1,swap:null,dim:-1,cap:"<b>删除完成！</b>46 到下标 9（叶子），堆性质恢复：<code>[09, 17, 65, 32, 45, 78, 87, 53, 46]</code>。"}
+],delC=0;
+function delR(){var s=delS[delC],n=s.vals.length,pos=treePos(n),sg='';
+for(var i=0;i<n;i++){[2*i+1,2*i+2].forEach(function(ch){if(ch<n)sg+='<line x1="'+pos[i].x+'" y1="'+(pos[i].y+24)+'" x2="'+pos[ch].x+'" y2="'+(pos[ch].y-24)+'" stroke="var(--bd2)" stroke-width="0.5"/>'})}
+if(s.swap){var a=s.swap[0],b=s.swap[1];sg+='<text x="'+((pos[a].x+pos[b].x)/2-16)+'" y="'+((pos[a].y+pos[b].y)/2)+'" font-size="16" fill="var(--or)" font-family="var(--sans)">⇅</text>'}
+for(var i=0;i<n;i++){if(i===s.dim)continue;var iF=i===s.focus,iSw=s.swap&&(s.swap[0]===i||s.swap[1]===i),last=delC===delS.length-1;
+var f,st,tf;if(iSw){f='var(--orb)';st='var(--or)';tf='var(--or)'}else if(iF){f='var(--rdb)';st='var(--rd)';tf='var(--rd)'}else if(last){f='var(--gnb)';st='var(--gn)';tf='var(--gn)'}else{f='var(--bg2)';st='var(--bd2)';tf='var(--tx)'}
+sg+='<circle cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="24" fill="'+f+'" stroke="'+st+'" stroke-width="1.2"/><text x="'+pos[i].x+'" y="'+pos[i].y+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="'+tf+'" font-family="var(--sans)">'+s.vals[i]+'</text><text x="'+pos[i].x+'" y="'+(pos[i].y+34)+'" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">['+D(i)+']</text>'}
+document.getElementById('del-svg').innerHTML=sg;
+var ae=document.getElementById('del-arr');ae.innerHTML='';for(var i=0;i<n;i++){var cl=document.createElement('div'),cls='ac',iF=i===s.focus,iSw=s.swap&&(s.swap[0]===i||s.swap[1]===i),last=delC===delS.length-1;if(i===s.dim)cls+=' dim';else if(iSw)cls+=' sw';else if(iF)cls+=' pp';else if(last)cls+=' ok';cl.className=cls;cl.innerHTML=s.vals[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl)}
+document.getElementById('del-cap').innerHTML=s.cap;document.getElementById('del-pb').disabled=delC===0;document.getElementById('del-nb').disabled=delC===delS.length-1;mkDots(document.getElementById('del-dots'),delS.length,delC)}
+function delGo(d){var n=delC+d;if(n>=0&&n<delS.length){delC=n;delR()}}
+delR();
+
+/* === 堆排序 === */
+var hsS=[
+{vals:[7,5,3,1,4,2],hn:6,swap:null,sift:-1,lk:[],cap:"<b>建堆完成</b>：大根堆 <code>[7, 5, 3, 1, 4, 2]</code>。根 A[1]=7 最大。"},
+{vals:[7,5,3,1,4,2],hn:6,swap:[0,5],sift:-1,lk:[],cap:"<b>第1趟</b>：堆顶 A[1]=7 和末尾 A[6]=2 交换。"},
+{vals:[2,5,3,1,4,7],hn:5,swap:null,sift:0,lk:[5],cap:"7 锁定。新根 2 下沉：较大的子 5。交换。"},
+{vals:[5,4,3,1,2,7],hn:5,swap:null,sift:-1,lk:[5],cap:"下沉完成：<code>[5, 4, 3, 1, 2]</code>。"},
+{vals:[5,4,3,1,2,7],hn:5,swap:[0,4],sift:-1,lk:[5],cap:"<b>第2趟</b>：堆顶 A[1]=5 和末尾 A[5]=2 交换。"},
+{vals:[2,4,3,1,5,7],hn:4,swap:null,sift:0,lk:[4,5],cap:"5 锁定。新根 2 下沉：较大的子 4。交换。"},
+{vals:[4,2,3,1,5,7],hn:4,swap:null,sift:-1,lk:[4,5],cap:"下沉完成：<code>[4, 2, 3, 1]</code>。"},
+{vals:[4,2,3,1,5,7],hn:4,swap:[0,3],sift:-1,lk:[4,5],cap:"<b>第3趟</b>：堆顶 A[1]=4 和末尾 A[4]=1 交换。"},
+{vals:[1,2,3,4,5,7],hn:3,swap:null,sift:0,lk:[3,4,5],cap:"4 锁定。新根 1 下沉：较大的子 3。交换。"},
+{vals:[3,2,1,4,5,7],hn:3,swap:null,sift:-1,lk:[3,4,5],cap:"下沉完成：<code>[3, 2, 1]</code>。"},
+{vals:[3,2,1,4,5,7],hn:3,swap:[0,2],sift:-1,lk:[3,4,5],cap:"<b>第4趟</b>：堆顶 A[1]=3 和末尾 A[3]=1 交换。"},
+{vals:[1,2,3,4,5,7],hn:2,swap:null,sift:0,lk:[2,3,4,5],cap:"3 锁定。新根 1 的子只有 2。1 &lt; 2，交换。"},
+{vals:[2,1,3,4,5,7],hn:2,swap:null,sift:-1,lk:[2,3,4,5],cap:"下沉完成：<code>[2, 1]</code>。"},
+{vals:[2,1,3,4,5,7],hn:2,swap:[0,1],sift:-1,lk:[2,3,4,5],cap:"<b>第5趟</b>：堆顶 A[1]=2 和末尾 A[2]=1 交换。"},
+{vals:[1,2,3,4,5,7],hn:0,swap:null,sift:-1,lk:[0,1,2,3,4,5],cap:"<b>排序完成！</b><code>[1, 2, 3, 4, 5, 7]</code>。总 O(n log n)。"}
+],hsC=0;
+function hsR(){var s=hsS[hsC],n=s.vals.length,hn=s.hn,pos=treePos(hn),sg='';
+for(var i=0;i<hn;i++){[2*i+1,2*i+2].forEach(function(ch){if(ch<hn)sg+='<line x1="'+pos[i].x+'" y1="'+(pos[i].y+24)+'" x2="'+pos[ch].x+'" y2="'+(pos[ch].y-24)+'" stroke="var(--bd2)" stroke-width="0.5"/>'})}
+for(var i=0;i<hn;i++){var iSw=s.swap&&(s.swap[0]===i||s.swap[1]===i),iSf=s.sift===i;
+var f,st,tf;if(iSw){f='var(--orb)';st='var(--or)';tf='var(--or)'}else if(iSf){f='var(--rdb)';st='var(--rd)';tf='var(--rd)'}else{f='var(--bg2)';st='var(--bd2)';tf='var(--tx)'}
+sg+='<circle cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="24" fill="'+f+'" stroke="'+st+'" stroke-width="1.2"/><text x="'+pos[i].x+'" y="'+pos[i].y+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="'+tf+'" font-family="var(--sans)">'+s.vals[i]+'</text>'}
+document.getElementById('hs-svg').innerHTML=sg;
+var ae=document.getElementById('hs-arr');ae.innerHTML='';for(var i=0;i<n;i++){var cl=document.createElement('div'),cls='ac',iL=s.lk.indexOf(i)!==-1,iSw=s.swap&&(s.swap[0]===i||s.swap[1]===i),iSf=s.sift===i;if(iL)cls+=' lk';else if(iSw)cls+=' sw';else if(iSf)cls+=' pp';cl.className=cls;cl.innerHTML=s.vals[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl)}
+document.getElementById('hs-cap').innerHTML=s.cap;document.getElementById('hs-pb').disabled=hsC===0;document.getElementById('hs-nb').disabled=hsC===hsS.length-1;mkDots(document.getElementById('hs-dots'),hsS.length,hsC)}
+function hsGo(d){var n=hsC+d;if(n>=0&&n<hsS.length){hsC=n;hsR()}}
+hsR();
+</script>
+</body>
+</html>
