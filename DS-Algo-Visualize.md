@@ -38,7 +38,18 @@
 - 如果节点下方有 `<text>` 标注（如编码、层号），viewBox 底部还要再留 10px
 - **经验公式**：viewBox 高度 = max(节点 y + r) + 40
 
-### 铁律三：每个概念/步骤必须配 SVG 图示
+### 铁律三：动画必须与代码联动
+
+当页面涉及代码执行过程时，交互动画**必须与代码展示联动**。不能出现"动画是动画，代码是代码"的割裂情况。
+
+具体要求：
+- 动画的每个 step 必须标注当前正在执行代码的<b>第几行</b>
+- 代码展示区用 `.code-panel` 容器包裹，每行代码用 `<div class="cl">` 包裹，当前执行行加 `.cl.on` 高亮
+- 代码面板放在动画可视化区域的<b>上方或左侧</b>，形成"代码 + 可视化"的双面板布局
+- 说明文字（`.cap`）应同时解释<b>代码在做什么</b>和<b>数据结构如何变化</b>
+- 如果代码太长（超过 12 行），只展示与当前动画相关的核心片段，其余用 `// ...` 省略
+
+### 铁律四：每个概念/步骤必须配 SVG 图示
 
 页面中讲到任何可视化概念时，必须有对应的 SVG 图：
 - 数据结构（树、图、队列、栈等）→ 画结构图
@@ -54,9 +65,7 @@
 
 **反面教材**：一个概念讲解章节只有文字没有图——读者看着纯文字根本无法理解。
 
-### 铁律四：有来源时跟着来源的教学脉络走
-
-如果用户提供了 PDF/教材/笔记，**顺着来源的页面顺序**梳理章节——它先讲什么就先写什么章节，它用什么例子就用什么例子。不要从结论倒推，不要"提炼要点后重新组织"。
+### 铁律五：有来源时跟着来源的教学脉络走，**顺着来源的页面顺序**梳理章节——它先讲什么就先写什么章节，它用什么例子就用什么例子。不要从结论倒推，不要"提炼要点后重新组织"。
 
 如果没有提供来源（纯主题/算法请求），则按**自然教学顺序**组织：
 1. 先讲"这是什么"（定义/背景）
@@ -173,6 +182,9 @@ hr{border:none;border-top:1px solid var(--bd);margin:28px 0}
 .ac.lk{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
 .ac.dim{opacity:.25}
 .hidden{display:none}
+.code-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px 0;margin:10px 0;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto}
+.cl{padding:2px 16px;white-space:pre;color:var(--tx2);border-left:3px solid transparent;transition:all .15s}
+.cl.on{background:var(--blb);color:var(--tx);border-left-color:var(--bl);font-weight:500}
 ```
 
 ---
@@ -308,6 +320,7 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
   swap: [a, b],     // 交换对（null=无）
   lk: [...],        // 已锁定的下标
   hn: number,       // 堆大小（当数组比堆大时）
+  line: number,     // 当前高亮代码行号（从 0 开始，-1=无）
 }
 ```
 
@@ -316,15 +329,29 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
 {
   cap: "...",
   nodes: [{v:"值", x, y, cf, cs, ct}],   // 节点列表 + 颜色
-  edges: [{x1, y1, x2, y2, l?"0/1"}]      // 边列表（可选标签）
+  edges: [{x1, y1, x2, y2, l?"0/1"}],    // 边列表（可选标签）
+  arr: [...],         // 可选：关联数组状态
+  ch: [...],          // 可选：变化的数组下标
+  line: number,       // 当前高亮代码行号（从 0 开始，-1=无）
 }
 ```
 
-**原则**：每步只做一件事（比较 or 交换）；状态反映操作后的结果。
+**原则**：每步只做一件事（比较 or 交换）；状态反映操作后的结果。**当涉及代码时，每个 step 必须指定 `line` 字段**。
 
 ### 渲染函数模板
 
 完全二叉树用 `treePos()` 算坐标。非标准树结构（如哈夫曼森林合并、图等）需手动规划坐标——**务必遵守铁律二的间距要求**。
+
+**代码高亮辅助函数**（当动画关联代码时使用）：
+
+```javascript
+function hlLines(id,line){
+  var ls=document.getElementById(id).children;
+  for(var i=0;i<ls.length;i++) ls[i].classList.toggle('on',i===line);
+}
+```
+
+在 render 函数末尾调用 `hlLines('codeId', s.line)` 即可。
 
 #### 模板 A：数组 + 完全二叉树（堆、排序等）
 
@@ -404,7 +431,30 @@ render();
 
 ### 动画 HTML 结构
 
-带 SVG 树 + 数组的完整结构：
+带代码面板 + SVG 树 + 数组的完整结构（**推荐，涉及代码时必须使用**）：
+
+```html
+<div class="w">
+  <div class="code-panel" id="xx-code">
+    <div class="cl">int Find(int S[], int x) {</div>
+    <div class="cl">    if (S[x] &lt; 0) return x;</div>
+    <div class="cl">    S[x] = Find(S, S[x]);</div>
+    <div class="cl">    return S[x];</div>
+    <div class="cl">}</div>
+  </div>
+  <svg id="xx-svg" width="100%" viewBox="0 0 700 260"></svg>
+  <div class="albl">数组视角：</div>
+  <div class="aw"><div class="ar" id="xx-arr"></div></div>
+  <div class="ctrl">
+    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
+    <div class="dots" id="xx-dots"></div>
+    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
+  </div>
+  <div class="cap" id="xx-cap"></div>
+</div>
+```
+
+不带代码面板的简化结构（仅纯数据结构演示时使用）：
 
 ```html
 <div class="w">
@@ -492,3 +542,4 @@ document.addEventListener('keydown',function(e){
 7. **SVG 颜色硬编码**：SVG 中必须用 CSS 变量
 8. **公式显示**：不引入 LaTeX，用 Unicode 字符（Σ、×、≥、≤、⌊⌋）
 9. **只有动画没有静态图**：静态 SVG 用来解释概念，交互动画用来演示过程，两者都要有
+10. **动画与代码割裂**：涉及代码执行的动画必须用 `.code-panel` + `.cl.on` 高亮当前执行行，steps 里必须包含 `line` 字段。不能出现动画区域和代码区域互不关联的情况
