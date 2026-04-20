@@ -1,0 +1,61 @@
+<!--
+  三种动画 HTML 结构骨架。
+  按场景选一个复制，替换所有 xx-* id 为你的实际前缀（如 heap-push-svg / heap-push-arr 等）。
+  对应的 render/steps 在 assets/boilerplate.js 里选相应模板。
+-->
+
+
+<!-- ============================================================ -->
+<!-- 结构 1：代码面板 + SVG 树 + 数组（涉及代码时必须使用）         -->
+<!-- 搭配 assets/boilerplate.js 的模板 A + hlLines                  -->
+<!-- ============================================================ -->
+<div class="w">
+  <div class="code-panel" id="xx-code">
+    <div class="cl">int Find(int S[], int x) {</div>
+    <div class="cl">    if (S[x] &lt; 0) return x;</div>
+    <div class="cl">    S[x] = Find(S, S[x]);</div>
+    <div class="cl">    return S[x];</div>
+    <div class="cl">}</div>
+  </div>
+  <svg id="xx-svg" width="100%" viewBox="0 0 700 260"></svg>
+  <div class="albl">数组视角：</div>
+  <div class="aw"><div class="ar" id="xx-arr"></div></div>
+  <div class="ctrl">
+    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
+    <div class="dots" id="xx-dots"></div>
+    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
+  </div>
+  <div class="cap" id="xx-cap"></div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- 结构 2：无代码面板（仅数据结构演示时使用）                     -->
+<!-- 搭配 assets/boilerplate.js 的模板 A 或 B                       -->
+<!-- ============================================================ -->
+<div class="w">
+  <svg id="xx-svg" width="100%" viewBox="0 0 700 260"></svg>
+  <div class="albl">数组视角：</div>
+  <div class="aw"><div class="ar" id="xx-arr"></div></div>
+  <div class="ctrl">
+    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
+    <div class="dots" id="xx-dots"></div>
+    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
+  </div>
+  <div class="cap" id="xx-cap"></div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- 结构 3：只有数组（简单排序/队列/栈）                           -->
+<!-- 搭配 assets/boilerplate.js 的模板 C                            -->
+<!-- ============================================================ -->
+<div class="w">
+  <div class="aw"><div class="ar" id="xx-arr"></div></div>
+  <div class="ctrl">
+    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
+    <div class="dots" id="xx-dots"></div>
+    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
+  </div>
+  <div class="cap" id="xx-cap"></div>
+</div>

@@ -1,6 +1,6 @@
 ---
 name: ds-algo-visualize
-description: 生成单文件的交互式数据结构/算法可视化 HTML 教学页面。适用场景：用户提供 PDF/教材要求生成知识点讲解、给出主题要求做动画演示（如"演示快排"、"做个队列动画"）、提供代码或算法要求可视化执行过程、要求对比两个概念或解释原理。即使用户没有明确说"HTML"或"可视化"，只要涉及"知识点总结"、"教学页面"、"动画演示"、"算法执行过程"、"PDF 讲解"、"SVG 图示"、"逐步执行"等场景也应触发。产出风格：叙事正文为主，彩色框克制使用，SVG 图示 + 交互动画 + 代码联动，深色模式友好。
+description: 生成单文件的交互式数据结构/算法可视化 HTML 教学页面。适用场景：用户提供 PDF/教材要求生成知识点讲解、给出主题要求做动画演示（如"演示快排"、"做个队列动画"）、提供代码或算法要求可视化执行过程、要求对比两个概念或解释原理。即使用户没有明确说"HTML"或"可视化"，只要涉及"知识点总结"、"教学页面"、"动画演示"、"算法执行过程"、"PDF 讲解"、"SVG 图示"、"逐步执行"等场景也应触发。
 ---
 
 # 交互式可视化页面生成技能
@@ -122,89 +122,42 @@ description: 生成单文件的交互式数据结构/算法可视化 HTML 教学
 
 ---
 
-## CSS 骨架（固定不变）
+## 套用模板（`assets/`）
 
-将以下 CSS 块原样放入 `<style>` 标签，不做修改：
+`assets/` 目录下有三个必用文件，它们是页面的"骨骼"。生成页面时**用 Read 工具把对应文件读出来后原样嵌入**，不要 paraphrase 重写——paraphrase 会丢失 CSS 变量名、类名和模板字符串结构，导致样式和动画出问题。
 
-```css
-:root{--bg:#fff;--bg2:#f5f5f4;--tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#9a9a9a;--bd:rgba(0,0,0,.12);--bd2:rgba(0,0,0,.25);--bl:#378ADD;--blb:#E6F1FB;--blt:#0C447C;--gn:#1D9E75;--gnb:#E1F5EE;--gnt:#085041;--rd:#E24B4A;--rdb:#FCEBEB;--rdt:#791F1F;--or:#D08B1A;--orb:#FDF3E0;--gy:#B4B2A9;--gyb:#F1EFE8;--tl:#0F6E56;--tlb:#E1F5EE;--pp:#534AB7;--ppb:#EEEDFE;--mono:'SF Mono','Cascadia Code','Consolas',monospace;--sans:system-ui,-apple-system,sans-serif}
-@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#2c2c2a;--tx:#e8e8e8;--tx2:#9a9a9a;--tx3:#6b6b6b;--bd:rgba(255,255,255,.12);--bd2:rgba(255,255,255,.25);--bl:#85B7EB;--blb:#0C447C;--blt:#B5D4F4;--gn:#5DCAA5;--gnb:#085041;--gnt:#9FE1CB;--rd:#F09595;--rdb:#501313;--rdt:#F7C1C1;--or:#E8B84D;--orb:#5C3D00;--gy:#888780;--gyb:#444441;--tl:#5DCAA5;--tlb:#085041;--pp:#AFA9EC;--ppb:#26215C}}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--sans);background:var(--bg);color:var(--tx);display:flex;justify-content:center;padding:32px 16px;line-height:1.7}
-.c{max-width:740px;width:100%}
-h1{font-size:22px;font-weight:500;margin-bottom:4px}
-h2{font-size:17px;font-weight:500;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
-h3{font-size:15px;font-weight:500;margin:20px 0 8px}
-.sub{font-size:13px;color:var(--tx2);margin-bottom:28px}
-p{font-size:14px;color:var(--tx2);margin-bottom:10px}
-p b{font-weight:500;color:var(--tx)}
-s{color:var(--tx3);text-decoration:line-through}
-code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px}
-pre{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 16px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--tx)}
-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
-th{text-align:left;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);font-weight:500}
-td{padding:8px 10px;border:1px solid var(--bd);color:var(--tx2)}
-.info{border-left:3px solid var(--bl);padding:10px 14px;background:var(--blb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
-.ok{border-left:3px solid var(--gn);padding:10px 14px;background:var(--gnb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
-.warn{border-left:3px solid var(--or);padding:10px 14px;background:var(--orb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
-.toc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px 20px;margin:16px 0 28px}
-.toc-t{font-size:14px;font-weight:500;margin-bottom:8px}
-.toc a{display:block;font-size:13px;color:var(--bl);text-decoration:none;padding:3px 0}
-.toc a:hover{text-decoration:underline}
-.compare{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}
-.compare>div{flex:1;min-width:200px;border:1px solid var(--bd);border-radius:12px;padding:16px;background:var(--bg)}
-.compare h4{font-size:14px;font-weight:600;margin-bottom:8px}
-ul.prop{font-size:13px;color:var(--tx2);margin:8px 0 8px 20px;line-height:2}
-ul.prop li::marker{color:var(--bl)}
-.sb{display:flex;align-items:flex-start;gap:10px;margin:8px 0}
-.sn{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--blb);color:var(--bl);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.st{font-size:14px;color:var(--tx2)}
-.st b{font-weight:500;color:var(--tx)}
-hr{border:none;border-top:1px solid var(--bd);margin:28px 0}
-.w{border:1px solid var(--bd);border-radius:12px;padding:20px;margin:20px 0;background:var(--bg)}
-.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.tab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--bd);background:var(--bg2);color:var(--tx2);cursor:pointer;font-family:var(--sans)}
-.tab:hover{opacity:.8}
-.tab.on{background:var(--blb);color:var(--bl);border-color:var(--bl)}
-.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0}
-.btn{padding:6px 16px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);color:var(--tx);cursor:pointer;font-size:13px;font-family:var(--sans)}
-.btn:hover{opacity:.8}
-.btn:disabled{opacity:.3;cursor:default}
-.dots{display:flex;gap:6px;align-items:center}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--bd2);transition:background .2s}
-.dot.on{background:var(--bl)}
-.cap{font-size:13px;color:var(--tx2);line-height:1.7;min-height:50px;margin-top:8px}
-.cap b{font-weight:500;color:var(--tx)}
-.cap code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 5px;border-radius:4px}
-.albl{font-size:11px;color:var(--tx3);margin-bottom:18px}
-.aw{margin:8px 0 4px;overflow-x:auto;overflow-y:visible;padding-bottom:20px}
-.ar{display:flex;gap:0}
-.ac{width:44px;height:36px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;font-family:var(--mono);background:var(--bg2);color:var(--tx);flex-shrink:0;position:relative}
-.ac .ci{position:absolute;bottom:-14px;font-size:10px;color:var(--tx3);font-weight:400}
-.ac.hl{background:var(--blb);color:var(--bl);border-color:var(--bl)}
-.ac.nw{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
-.ac.sw{background:var(--orb);color:var(--or);border-color:var(--or)}
-.ac.pp{background:var(--rdb);color:var(--rd);border-color:var(--rd)}
-.ac.ok{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
-.ac.lk{background:var(--gnb);color:var(--gn);border-color:var(--gn)}
-.ac.dim{opacity:.25}
-.hidden{display:none}
-.code-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px 0;margin:10px 0;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto}
-.cl{padding:2px 16px;white-space:pre;color:var(--tx2);border-left:3px solid transparent;transition:all .15s}
-.cl.on{background:var(--blb);color:var(--tx);border-left-color:var(--bl);font-weight:500}
-```
+### `assets/base.css` — CSS 骨架
 
----
+包含颜色变量（含深色模式）、基础排版、所有 callout / compare / 动画容器 / 数组单元格 / 代码面板样式。
 
-## JS 工具函数（固定不变）
+**用法**：读入后**原样放入 `<style>` 标签**，不做修改。如果需要调整字号或间距，**在骨架后追加覆盖规则**，不要改骨架本身——骨架改动会影响参考实现的视觉一致性。
 
-将以下函数原样放入 `<script>` 标签：
+### `assets/boilerplate.js` — JavaScript 工具 + 渲染模板
 
-```javascript
-function treePos(n){var pos=[];if(!n)return pos;for(var i=0;i<n;i++){var lv=Math.floor(Math.log2(i+1)),idx=i-(Math.pow(2,lv)-1),cnt=Math.pow(2,lv),H=Math.min(60,220/Math.ceil(Math.log2(n+1))),span=600,gap=span/cnt;pos.push({x:50+gap*(idx+.5),y:40+lv*H})}return pos}
-function mkDots(el,t,c){el.innerHTML='';for(var i=0;i<t;i++){var d=document.createElement('div');d.className='dot'+(i===c?' on':'');el.appendChild(d)}}
-function D(i){return i+1}
-```
+内含六块内容，按需选取：
+
+| 块 | 何时嵌入 |
+|---|---|
+| 工具函数（`treePos` / `mkDots` / `D`） | 所有动画场景必嵌 |
+| `hlLines` 代码高亮助手 | 当动画联动代码时嵌入（铁律三） |
+| **模板 A**：数组 + 完全二叉树 | 堆、堆排序——任何"数组 + 完全二叉树双视角"的演示 |
+| **模板 B**：自定义坐标树 | 哈夫曼森林合并、BST、图等需要手算坐标的场景（务必遵守铁律二） |
+| **模板 C**：纯数组 | 简单排序、队列、栈——没有树形结构时 |
+| 键盘导航 | 所有动画页面都应加 |
+
+**只摘取对应模板块**嵌入 `<script>`（按文件里的注释分割线取一段），**不要把整文件复制进去**——模板 A 和 C 都声明了顶层 `var steps` / `function render` / `function go`，两块一起嵌入会重复声明报错。正确的嵌入顺序：**工具函数块 → 选定的渲染模板块 →（如需）`hlLines` 块 → 键盘导航块 → 你自己的 `steps` 数据**。
+
+使用模板 A 之前注意看文件里的注释：必须自行定义 `clsFn(i)`（决定数组单元格的高亮类），否则会抛错。模板 B 只提供 `renderStep()` 纯函数，需要自己写一小段 `cur` + `go(d)` + 初始化的驱动层（文件里有示例）。
+
+### `assets/animation-html.html` — 三种动画 HTML 骨架
+
+| 骨架 | 对应场景 | 配套 JS |
+|---|---|---|
+| **结构 1**：代码面板 + SVG 树 + 数组 | 涉及代码时**必须**使用（铁律三） | 模板 A + `hlLines` |
+| **结构 2**：SVG 树 + 数组 | 纯数据结构演示 | 模板 A 或 B |
+| **结构 3**：只有数组 | 简单排序 / 队列 / 栈 | 模板 C |
+
+按场景选一个复制到对应章节，**把所有 `xx-*` id 替换为你的实际前缀**（如 `heap-push-svg`、`heap-push-arr` 等），避免同页多个动画互相冲突。
 
 ---
 
@@ -300,7 +253,9 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
 
 ---
 
-## 交互式动画
+## 交互式动画（设计原则）
+
+> 动画的 JS 模板和 HTML 骨架在 `assets/` 里，本节只讲**设计层面**的约定——颜色语义、每个 step 里放什么数据、怎么选模板。
 
 ### 颜色约定
 
@@ -318,7 +273,7 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
 
 每个动画场景的 steps 是一个数组。每个 step 包含当前完整状态：
 
-**数组/堆类动画**（完全二叉树 + 数组双视角）：
+**数组/堆类动画**（完全二叉树 + 数组双视角，搭配模板 A）：
 ```
 {
   vals: [...],      // 当前数组状态
@@ -331,7 +286,7 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
 }
 ```
 
-**通用树/图动画**（自定义坐标）：
+**通用树/图动画**（自定义坐标，搭配模板 B）：
 ```
 {
   cap: "...",
@@ -343,162 +298,13 @@ callout 框只在以下情况出现，**整页总共不超过 3-4 个**：
 }
 ```
 
-**原则**：每步只做一件事（比较 or 交换）；状态反映操作后的结果。**当涉及代码时，每个 step 必须指定 `line` 字段**。
+**原则**：每步只做一件事（比较 or 交换）；状态反映操作后的结果。**当涉及代码时，每个 step 必须指定 `line` 字段**，render 函数末尾调用 `hlLines('codeId', s.line)`。
 
-### 渲染函数模板
+### 模板选择速查
 
-完全二叉树用 `treePos()` 算坐标。非标准树结构（如哈夫曼森林合并、图等）需手动规划坐标——**务必遵守铁律二的间距要求**。
-
-**代码高亮辅助函数**（当动画关联代码时使用）：
-
-```javascript
-function hlLines(id,line){
-  var ls=document.getElementById(id).children;
-  for(var i=0;i<ls.length;i++) ls[i].classList.toggle('on',i===line);
-}
-```
-
-在 render 函数末尾调用 `hlLines('codeId', s.line)` 即可。
-
-#### 模板 A：数组 + 完全二叉树（堆、排序等）
-
-```javascript
-var steps=[...], cur=0;
-function render(){
-  var s=steps[cur], n=s.vals.length, pos=treePos(n), sg='';
-  for(var i=0;i<n;i++){[2*i+1,2*i+2].forEach(function(ch){
-    if(ch<n) sg+='<line x1="'+pos[i].x+'" y1="'+(pos[i].y+24)+'" x2="'+pos[ch].x+'" y2="'+(pos[ch].y-24)+'" stroke="var(--bd2)" stroke-width="0.5"/>';
-  })}
-  if(s.swap){var a=s.swap[0],b=s.swap[1];sg+='<text x="'+((pos[a].x+pos[b].x)/2-16)+'" y="'+((pos[a].y+pos[b].y)/2)+'" font-size="16" fill="var(--or)" font-family="var(--sans)">⇅</text>'}
-  for(var i=0;i<n;i++){
-    var c=(function(i){
-      if(s.swap&&(s.swap[0]===i||s.swap[1]===i))return{f:'var(--orb)',s:'var(--or)',t:'var(--or)'};
-      if(s.focus===i)return{f:'var(--blb)',s:'var(--bl)',t:'var(--bl)'};
-      return{f:'var(--bg2)',s:'var(--bd2)',t:'var(--tx)'};
-    })(i);
-    sg+='<circle cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="24" fill="'+c.f+'" stroke="'+c.s+'" stroke-width="1.2"/>';
-    sg+='<text x="'+pos[i].x+'" y="'+pos[i].y+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="'+c.t+'" font-family="var(--sans)">'+s.vals[i]+'</text>';
-    sg+='<text x="'+pos[i].x+'" y="'+(pos[i].y+34)+'" text-anchor="middle" font-size="10" fill="var(--tx3)" font-family="var(--mono)">['+D(i)+']</text>';
-  }
-  document.getElementById('svgId').innerHTML=sg;
-  var ae=document.getElementById('arrId');ae.innerHTML='';
-  for(var i=0;i<n;i++){var cl=document.createElement('div');cl.className='ac'+clsFn(i);cl.innerHTML=s.vals[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl)}
-  document.getElementById('capId').innerHTML=s.cap;
-  document.getElementById('pbId').disabled=cur===0;
-  document.getElementById('nbId').disabled=cur===steps.length-1;
-  mkDots(document.getElementById('dotsId'),steps.length,cur);
-}
-function go(d){var n=cur+d;if(n>=0&&n<steps.length){cur=n;render()}}
-render();
-```
-
-#### 模板 B：自定义坐标树（哈夫曼、BST 等）
-
-```javascript
-var R=24;
-function renderStep(svgId,capId,pbId,nbId,dotsId,steps,cur){
-  var s=steps[cur],svg=document.getElementById(svgId),g='';
-  s.edges.forEach(function(e){
-    g+='<line x1="'+e.x1+'" y1="'+(e.y1+R)+'" x2="'+e.x2+'" y2="'+(e.y2-R)+'" stroke="var(--bd2)" stroke-width="0.5"/>';
-    if(e.l!=null){var mx=(e.x1+e.x2)/2,my=(e.y1+R+e.y2-R)/2;g+='<text x="'+(mx-10)+'" y="'+my+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="var(--bl)" font-family="var(--mono)">'+e.l+'</text>'}
-  });
-  s.nodes.forEach(function(n){
-    g+='<circle cx="'+n.x+'" cy="'+n.y+'" r="'+R+'" fill="'+n.cf+'" stroke="'+n.cs+'" stroke-width="1.2"/>';
-    g+='<text x="'+n.x+'" y="'+n.y+'" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="'+n.ct+'" font-family="var(--sans)">'+n.v+'</text>';
-  });
-  svg.innerHTML=g;
-  document.getElementById(capId).innerHTML=s.cap;
-  document.getElementById(pbId).disabled=cur===0;
-  document.getElementById(nbId).disabled=cur===steps.length-1;
-  mkDots(document.getElementById(dotsId),steps.length,cur);
-}
-```
-
-#### 模板 C：纯数组动画（排序、队列、栈等）
-
-```javascript
-var steps=[...], cur=0;
-function render(){
-  var s=steps[cur], n=s.vals.length, ae=document.getElementById('arrId');ae.innerHTML='';
-  for(var i=0;i<n;i++){
-    var cl=document.createElement('div');cl.className='ac';
-    if(s.swap&&(s.swap[0]===i||s.swap[1]===i))cl.classList.add('sw');
-    else if(s.focus===i)cl.classList.add('hl');
-    else if(s.lk&&s.lk.indexOf(i)>=0)cl.classList.add('lk');
-    cl.innerHTML=s.vals[i]+'<span class="ci">'+D(i)+'</span>';ae.appendChild(cl);
-  }
-  document.getElementById('capId').innerHTML=s.cap;
-  document.getElementById('pbId').disabled=cur===0;
-  document.getElementById('nbId').disabled=cur===steps.length-1;
-  mkDots(document.getElementById('dotsId'),steps.length,cur);
-}
-function go(d){var n=cur+d;if(n>=0&&n<steps.length){cur=n;render()}}
-render();
-```
-
-### 动画 HTML 结构
-
-带代码面板 + SVG 树 + 数组的完整结构（**推荐，涉及代码时必须使用**）：
-
-```html
-<div class="w">
-  <div class="code-panel" id="xx-code">
-    <div class="cl">int Find(int S[], int x) {</div>
-    <div class="cl">    if (S[x] &lt; 0) return x;</div>
-    <div class="cl">    S[x] = Find(S, S[x]);</div>
-    <div class="cl">    return S[x];</div>
-    <div class="cl">}</div>
-  </div>
-  <svg id="xx-svg" width="100%" viewBox="0 0 700 260"></svg>
-  <div class="albl">数组视角：</div>
-  <div class="aw"><div class="ar" id="xx-arr"></div></div>
-  <div class="ctrl">
-    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
-    <div class="dots" id="xx-dots"></div>
-    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
-  </div>
-  <div class="cap" id="xx-cap"></div>
-</div>
-```
-
-不带代码面板的简化结构（仅纯数据结构演示时使用）：
-
-```html
-<div class="w">
-  <svg id="xx-svg" width="100%" viewBox="0 0 700 260"></svg>
-  <div class="albl">数组视角：</div>
-  <div class="aw"><div class="ar" id="xx-arr"></div></div>
-  <div class="ctrl">
-    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
-    <div class="dots" id="xx-dots"></div>
-    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
-  </div>
-  <div class="cap" id="xx-cap"></div>
-</div>
-```
-
-只有数组的简化结构：
-
-```html
-<div class="w">
-  <div class="aw"><div class="ar" id="xx-arr"></div></div>
-  <div class="ctrl">
-    <button class="btn" id="xx-pb" onclick="go(-1)">上一步</button>
-    <div class="dots" id="xx-dots"></div>
-    <button class="btn" id="xx-nb" onclick="go(1)">下一步</button>
-  </div>
-  <div class="cap" id="xx-cap"></div>
-</div>
-```
-
-### 键盘导航
-
-```javascript
-document.addEventListener('keydown',function(e){
-  if(e.key==='ArrowLeft') go(-1);
-  if(e.key==='ArrowRight') go(1);
-});
-```
+- 有完全二叉树 + 数组双视角 → 模板 A（`treePos` 自动算坐标）
+- 树结构不规则（合并、删除导致形状变化）→ 模板 B（手算坐标，**务必遵守铁律二**）
+- 只有数组 → 模板 C
 
 ---
 
@@ -511,7 +317,7 @@ document.addEventListener('keydown',function(e){
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>标题</title>
-  <style>/* CSS 骨架 */</style>
+  <style>/* 读入 assets/base.css 原样嵌入 */</style>
 </head>
 <body>
 <div class="c">
@@ -526,12 +332,12 @@ document.addEventListener('keydown',function(e){
 
   <h2 id="s2">2. ...</h2>
   <p>正文...</p>
-  <div class="w">交互动画...</div>
+  <div class="w">交互动画（从 assets/animation-html.html 选一个骨架）</div>
 
   <h2 id="sN">N. 总结</h2>
   <p>回顾...</p>
 </div>
-<script>/* JS 工具函数 + steps + render */</script>
+<script>/* 读入 assets/boilerplate.js 里的工具 + 选定模板 + 自己的 steps */</script>
 </body>
 </html>
 ```
@@ -550,6 +356,8 @@ document.addEventListener('keydown',function(e){
 8. **公式显示**：不引入 LaTeX，用 Unicode 字符（Σ、×、≥、≤、⌊⌋）
 9. **只有动画没有静态图**：静态 SVG 用来解释概念，交互动画用来演示过程，两者都要有
 10. **动画与代码割裂**：涉及代码执行的动画必须用 `.code-panel` + `.cl.on` 高亮当前执行行，steps 里必须包含 `line` 字段。不能出现动画区域和代码区域互不关联的情况
+11. **paraphrase 骨架文件**：`assets/base.css` 和 `assets/boilerplate.js` 里的代码不要手改或重写，读出来原样嵌入；需要定制在后面追加覆盖规则
+12. **忘替换 id 前缀**：`assets/animation-html.html` 里所有 `xx-*` id 必须全部替换为实际前缀，同页多个动画用不同前缀隔离
 
 ---
 
@@ -558,6 +366,5 @@ document.addEventListener('keydown',function(e){
 由于单个 HTML 文件通常很大（300-600 行），一次性写入容易因网络断流导致全部丢失。**必须分阶段写入**：
 
 1. **先告知用户整体计划**：列出页面将包含哪些章节、几个动画、预计总行数，让用户确认方向正确
-2. **分块写入**：先写 HTML 骨架 + CSS + 前几个章节的静态内容，确认写入成功后，再用 Edit 追加后续章节和 JS
+2. **分块写入**：先写 HTML 骨架 + CSS（从 `assets/base.css` 读入）+ 前几个章节的静态内容，确认写入成功后，再用 Edit 追加后续章节和 JS
 3. **每完成一个阶段，告知用户进度**（如"CSS + 前 3 节静态内容已写入，接下来写第 4 节动画和 JS"）
-4. 如果 JS 步骤数据很多，可以分多次 Edit 追加到 steps 数组中
