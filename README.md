@@ -2,7 +2,7 @@
 
 [English](README.en.md)
 
-用于生成交互式单文件 HTML 页面的 Claude Code 技能，专注数据结构与算法的教学可视化。设计风格受 Claude Desktop 可视化功能启发，提炼为可独立复用的技能包。
+尝试将 Claude Desktop 的可视化功能提炼为可独立使用的 skill，专注数据结构与算法的交互式教学可视化。
 
 ## 示例
 
@@ -13,6 +13,8 @@
 **交互式逐步动画：**
 
 ![交互动画示例](images/interactive-animation-demo.gif)
+
+![交互动画示例 2](images/interactive-animation-demo-2.gif)
 
 [Live Demo](https://l0dyv.github.io/claude-algo-visualize/references/heap_overview.html) -- 完整交互式参考实现
 

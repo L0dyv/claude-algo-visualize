@@ -2,7 +2,7 @@
 
 [中文](README.md)
 
-A Claude Code skill for generating interactive single-file HTML pages for data structure and algorithm visualization. Inspired by the visualization style of Claude Desktop, distilled into a reusable Claude Code skill.
+An attempt to distill Claude Desktop's visualization capability into a standalone, reusable skill for interactive data structure and algorithm teaching.
 
 ## Demo
 
@@ -13,6 +13,8 @@ A Claude Code skill for generating interactive single-file HTML pages for data s
 **Interactive step-by-step animations:**
 
 ![Interactive animation demo](images/interactive-animation-demo.gif)
+
+![Interactive animation demo 2](images/interactive-animation-demo-2.gif)
 
 [Live Demo](https://l0dyv.github.io/claude-algo-visualize/references/heap_overview.html) -- Full interactive reference implementation
 
