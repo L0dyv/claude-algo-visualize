@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>堆 · 全景梳理</title>
 <style>
-:root{--bg:#fff;--bg2:#f5f5f4;--tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#9a9a9a;--bd:rgba(0,0,0,.12);--bd2:rgba(0,0,0,.25);--bl:#378ADD;--blb:#E6F1FB;--blt:#0C447C;--gn:#1D9E75;--gnb:#E1F5EE;--gnt:#085041;--rd:#E24B4A;--rdb:#FCEBEB;--rdt:#791F1F;--or:#D08B1A;--orb:#FDF3E0;--gy:#B4B2A9;--gyb:#F1EFE8;--tl:#0F6E56;--tlb:#E1F5EE;--pp:#534AB7;--ppb:#EEEDFE;--mono:'SF Mono','Cascadia Code','Consolas',monospace;--sans:system-ui,-apple-system,sans-serif}
+:root{--bg:#fff;--bg2:#f5f5f4;--tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#9a9a9a;--bd:rgba(0,0,0,.12);--bd2:rgba(0,0,0,.25);--bl:#378ADD;--blb:#E6F1FB;--blt:#0C447C;--gn:#1D9E75;--gnb:#E1F5EE;--gnt:#085041;--rd:#E24B4A;--rdb:#FCEBEB;--rdt:#791F1F;--or:#D08B1A;--orb:#FDF3E0;--gy:#B4B2A9;--gyb:#F1EFE8;--tl:#0F6E56;--tlb:#E1F5EE;--pp:#534AB7;--ppb:#EEEDFE;--mono:'SF Mono','Cascadia Code','Consolas',monospace;--sans:system-ui,-apple-system,sans-serif;--serif:'Noto Serif SC','Songti SC','Source Han Serif SC','SimSun',serif}
 @media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#2c2c2a;--tx:#e8e8e8;--tx2:#9a9a9a;--tx3:#6b6b6b;--bd:rgba(255,255,255,.12);--bd2:rgba(255,255,255,.25);--bl:#85B7EB;--blb:#0C447C;--blt:#B5D4F4;--gn:#5DCAA5;--gnb:#085041;--gnt:#9FE1CB;--rd:#F09595;--rdb:#501313;--rdt:#F7C1C1;--or:#E8B84D;--orb:#5C3D00;--gy:#888780;--gyb:#444441;--tl:#5DCAA5;--tlb:#085041;--pp:#AFA9EC;--ppb:#26215C}}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--sans);background:var(--bg);color:var(--tx);display:flex;justify-content:center;padding:32px 16px;line-height:1.7}
 .c{max-width:740px;width:100%}
-h1{font-size:22px;font-weight:500;margin-bottom:4px}
-h2{font-size:17px;font-weight:500;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
-h3{font-size:15px;font-weight:500;margin:20px 0 8px}
+h1{font-size:22px;font-weight:500;margin-bottom:4px;font-family:var(--serif)}
+h2{font-size:17px;font-weight:500;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bd);font-family:var(--serif)}
+h3{font-size:15px;font-weight:500;margin:20px 0 8px;font-family:var(--serif)}
 .sub{font-size:13px;color:var(--tx2);margin-bottom:28px}
 p{font-size:14px;color:var(--tx2);margin-bottom:10px}
 p b{font-weight:500;color:var(--tx)}
@@ -23,7 +23,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
 th{text-align:left;padding:8px 10px;background:var(--bg2);border:1px solid var(--bd);font-weight:500}
 td{padding:8px 10px;border:1px solid var(--bd);color:var(--tx2)}
 .info{border-left:3px solid var(--bl);padding:10px 14px;background:var(--blb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
-.ok{border-left:3px solid var(--gn);padding:10px 14px;background:var(--gnb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
+.good{border-left:3px solid var(--gn);padding:10px 14px;background:var(--gnb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
 .warn{border-left:3px solid var(--or);padding:10px 14px;background:var(--orb);border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--tx)}
 .toc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px 20px;margin:16px 0 28px}
 .toc-t{font-size:14px;font-weight:500;margin-bottom:8px}
@@ -39,7 +39,12 @@ ul.prop li::marker{color:var(--bl)}
 .st{font-size:14px;color:var(--tx2)}
 .st b{font-weight:500;color:var(--tx)}
 hr{border:none;border-top:1px solid var(--bd);margin:28px 0}
-.w{border:1px solid var(--bd);border-radius:12px;padding:20px;margin:20px 0;background:var(--bg)}
+.w{border:1px solid var(--bd);border-radius:12px;padding:20px;margin:20px 0;background:var(--bg);position:relative}
+.expand-btn{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--bg2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;transition:opacity .2s,background .15s;padding:0}
+.w:hover .expand-btn,.expand-btn:focus{opacity:.6}
+.expand-btn:hover{opacity:1!important;background:var(--blb);color:var(--bl);border-color:var(--bl)}
+.viz-wide{position:fixed!important;top:16px;left:16px;right:16px;bottom:16px;width:auto!important;max-width:none!important;margin:0!important;z-index:9999;overflow:auto;background:var(--bg)!important;border-radius:12px!important;box-shadow:0 0 0 9999px rgba(0,0,0,.4)}
+.viz-wide .expand-btn{opacity:.6}
 .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .tab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--bd);background:var(--bg2);color:var(--tx2);cursor:pointer;font-family:var(--sans)}
 .tab:hover{opacity:.8}
@@ -70,6 +75,9 @@ hr{border:none;border-top:1px solid var(--bd);margin:28px 0}
 .code-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px 0;margin:10px 0;font-family:var(--mono);font-size:12px;line-height:1.8;overflow-x:auto}
 .cl{padding:2px 16px;white-space:pre;color:var(--tx2);border-left:3px solid transparent;transition:all .15s}
 .cl.on{background:var(--blb);color:var(--tx);border-left-color:var(--bl);font-weight:500}
+.watermark{margin-top:40px;padding-top:12px;border-top:1px solid var(--bd);font-size:11px;color:var(--tx3);text-align:center}
+.watermark a{color:var(--tx3);text-decoration:none}
+.watermark a:hover{text-decoration:underline;color:var(--tx2)}
 </style>
 </head>
 <body>
@@ -234,7 +242,7 @@ hr{border:none;border-top:1px solid var(--bd);margin:28px 0}
 <p>而 <code>⌊(n-2)/2⌋</code> 在 C 的整数除法下等价于 <code>n/2 - 1</code>（可分 n 为奇偶验证）。</p>
 <div class="info"><b>下标从 1 起的版本更简洁</b>：最后一个元素下标为 n，父节点直接 <code>n/2</code>（整数除法）。这也是很多课本选择从 1 开始的原因——公式更干净。</div>
 
-<div class="ok"><b>时间复杂度 O(n)</b>，不是 O(n log n)。大部分节点在底层，下沉路径短。</div>
+<div class="good"><b>时间复杂度 O(n)</b>，不是 O(n log n)。大部分节点在底层，下沉路径短。</div>
 <div class="w">
 <svg id="bh-svg" width="100%" viewBox="0 0 700 260"></svg>
 <div class="albl">数组视角：</div>
@@ -317,8 +325,9 @@ void HeapSort(int A[], int len) {
 <tr><td><b>堆类型</b></td><td>按需求选</td><td>升序用大根堆</td></tr>
 <tr><td><b>总复杂度</b></td><td>每次 O(log n)</td><td>O(n log n)</td></tr>
 </table>
-<div class="ok"><b>核心教训</b>：push/pop 和堆排序共享同一套底层机制（上浮/下沉），只是<b>目的不同</b>：一个是进进出出的容器，一个是原地排序的算法。</div>
+<div class="good"><b>核心教训</b>：push/pop 和堆排序共享同一套底层机制（上浮/下沉），只是<b>目的不同</b>：一个是进进出出的容器，一个是原地排序的算法。</div>
 
+<div class="watermark">Made with <a href="https://github.com/L0dyv/claude-algo-visualize" target="_blank"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-1px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> claude-algo-visualize</a></div>
 </div>
 <script>
 function treePos(n){var pos=[];if(!n)return pos;for(var i=0;i<n;i++){var lv=Math.floor(Math.log2(i+1)),idx=i-(Math.pow(2,lv)-1),cnt=Math.pow(2,lv),H=Math.min(60,220/Math.ceil(Math.log2(n+1))),span=600,gap=span/cnt;pos.push({x:50+gap*(idx+.5),y:40+lv*H})}return pos}
@@ -439,6 +448,19 @@ var ae=document.getElementById('hs-arr');ae.innerHTML='';for(var i=0;i<n;i++){va
 document.getElementById('hs-cap').innerHTML=s.cap;document.getElementById('hs-pb').disabled=hsC===0;document.getElementById('hs-nb').disabled=hsC===hsS.length-1;mkDots(document.getElementById('hs-dots'),hsS.length,hsC)}
 function hsGo(d){var n=hsC+d;if(n>=0&&n<hsS.length){hsC=n;hsR()}}
 hsR();
+
+/* === VizExpand === */
+var VizExpand=(function(){
+var icoExpand='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.5 1H13v4.5M5.5 13H1V8.5"/></svg>';
+var icoClose='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>';
+var overlay=null,activeEl=null,placeholder=null,savedOverflow='';
+function open(el){if(activeEl)return;activeEl=el;placeholder=document.createComment('viz-expand');el.parentNode.insertBefore(placeholder,el);document.body.appendChild(el);el.classList.add('viz-wide');savedOverflow=document.body.style.overflow;document.body.style.overflow='hidden';overlay=document.createElement('div');overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998';overlay.addEventListener('click',close);document.body.appendChild(overlay);el.querySelector('.expand-btn').innerHTML=icoClose;el.querySelector('.expand-btn').title='收起';window.dispatchEvent(new Event('resize'))}
+function close(){if(!activeEl)return;activeEl.classList.remove('viz-wide');if(placeholder&&placeholder.parentNode){placeholder.parentNode.insertBefore(activeEl,placeholder);placeholder.parentNode.removeChild(placeholder)}placeholder=null;document.body.style.overflow=savedOverflow;if(overlay&&overlay.parentNode)overlay.parentNode.removeChild(overlay);overlay=null;activeEl.querySelector('.expand-btn').innerHTML=icoExpand;activeEl.querySelector('.expand-btn').title='展开';window.dispatchEvent(new Event('resize'));activeEl=null}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&activeEl){close();e.preventDefault()}});
+var els=document.querySelectorAll('.w');
+for(var i=0;i<els.length;i++){var btn=document.createElement('button');btn.className='expand-btn';btn.title='展开';btn.innerHTML=icoExpand;(function(el){btn.addEventListener('click',function(e){e.stopPropagation();if(activeEl===el)close();else open(el)})})(els[i]);els[i].appendChild(btn)}
+return{init:function(){}}
+})();
 </script>
 </body>
 </html>

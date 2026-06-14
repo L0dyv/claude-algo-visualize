@@ -125,3 +125,76 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowLeft') go(-1);
   if(e.key==='ArrowRight') go(1);
 });
+
+
+// ============================================================
+// VizExpand — 动画容器展开/收起（两态）
+// 为每个 .w 容器右上角添加展开按钮
+// 点击切换：正常 ↔ 页面全屏（覆盖层）
+// 支持 ESC 和点击遮罩关闭
+// 页面加载后自动初始化，嵌入即可
+// ============================================================
+var VizExpand=(function(){
+  var icoExpand='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.5 1H13v4.5M5.5 13H1V8.5"/></svg>';
+  var icoClose='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>';
+  var overlay=null,activeEl=null,placeholder=null,savedOverflow='';
+
+  function open(el){
+    if(activeEl)return;
+    activeEl=el;
+    placeholder=document.createComment('viz-expand');
+    el.parentNode.insertBefore(placeholder,el);
+    document.body.appendChild(el);
+    el.classList.add('viz-wide');
+    savedOverflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998';
+    overlay.addEventListener('click',close);
+    document.body.appendChild(overlay);
+    el.querySelector('.expand-btn').innerHTML=icoClose;
+    el.querySelector('.expand-btn').title='收起';
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  function close(){
+    if(!activeEl)return;
+    activeEl.classList.remove('viz-wide');
+    if(placeholder&&placeholder.parentNode){
+      placeholder.parentNode.insertBefore(activeEl,placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    }
+    placeholder=null;
+    document.body.style.overflow=savedOverflow;
+    if(overlay&&overlay.parentNode)overlay.parentNode.removeChild(overlay);
+    overlay=null;
+    activeEl.querySelector('.expand-btn').innerHTML=icoExpand;
+    activeEl.querySelector('.expand-btn').title='展开';
+    window.dispatchEvent(new Event('resize'));
+    activeEl=null;
+  }
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&activeEl){close();e.preventDefault()}
+  });
+
+  function init(){
+    var els=document.querySelectorAll('.w');
+    for(var i=0;i<els.length;i++){
+      if(els[i].querySelector('.expand-btn'))continue;
+      var btn=document.createElement('button');
+      btn.className='expand-btn';
+      btn.title='展开';
+      btn.innerHTML=icoExpand;
+      (function(el){btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(activeEl===el)close();else open(el);
+      })})(els[i]);
+      els[i].appendChild(btn);
+    }
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+  else init();
+  return{init:init};
+})();
